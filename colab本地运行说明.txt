@@ -1,0 +1,14 @@
+https://research.google.com/colaboratory/local-runtimes.html
+上面是教学网址
+首先打开colab然后找到一个ipynb文件打开
+右上角有个连接到本地。然后打开cmd输入复制粘贴以下代码输入：
+  jupyter notebook \
+    --NotebookApp.allow_origin='https://colab.research.google.com' \
+    --port=8888 \
+    --NotebookApp.port_retries=0
+
+然后不要乱动复制输出的url网址到colab里面就可以了。
+期间cmd不能关闭，打开的jupyternotebook也不能关闭，只要不关闭就能一直用。关闭了就要重新输。
+
+docker run --gpus=all -p 127.0.0.1:9000:8080 us-docker.pkg.dev/colab-images/public/runtime
+

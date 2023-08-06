@@ -1,0 +1,84 @@
+win
+--------------------------------Tensorflow-----------------------（win 2.10 后Tensorflow不分cpu和gpu版）
+python=3.9
+tensorflow=2.10.0 （conda search tensorflow可以找到其他版本）
+----------------安装------------------------------------
+使用anaconda prompt
+
+conda create -n tensorflow python=3.9（只跑一次）
+（这个虚拟环境一般在C:\Users\username\.conda\envs）
+用conda info --envs看安好没
+conda activate tensorflow
+
+conda install cudatoolkit cudnn
+(不需要在网上单独下载)
+
+pip install tensorflow==2.10.0
+
+--------验证安装---------------------------------
+python
+import tensorflow as tf
+print(tf.config.experimental.list_physical_devices(device_type='GPU'))
+（查看安装好没）
+
+---------使用-----------------------------------------
+在VS里面跑选择内核的时候选择自己设置的jupyter keral 环境，名字就是上面的tensorflow
+
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
+查看是否使用的GPU
+
+import os
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+# The GPU id to use, usually either "0" or "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0or1"   
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1" 为使用CPU  
+（可以在运行开始前运行这部分）
+
+print(device_lib.list_local_devices())
+再次查看是否使用的GPU   
+
+单gpu运行
+CUDA_VISIBLE_DEVICES=2 python train.py
+
+多gpu运行
+CUDA_VISIBLE_DEVICES=2,3,4 python train.py
+
+
+------------------------------------使用pytorch----------------
+https://blog.csdn.net/weixin_44842318/article/details/127492491 
+conda create -n pytorch python=3.9（只跑一次）
+conda info --envs
+conda activate pytorch
+conda install cudatoolkit cudnn （如果不行就试试，再加一个pytorch让他自己找合适的版本）
+
+先conda list 看下cudatoolkit版本是多少。
+去官网找到合适的版本，一般来说稳定版
+然后pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+torch 2.0.1+cu118
+
+>>> import torch
+>>> torch.cuda.is_available()
+为true就对了
+
+--------------------------------------------------------------------
+（Homework1）
+# Enable/Disable Eager Execution # Reference: https://www.tensorflow.org/guide/eager 
+# TensorFlow's eager execution is an imperative programming environment that evaluates operations immediately, # without building graphs  
+#tf.compat.v1.disable_eager_execution() 
+#tf.compat.v1.enable_eager_execution()  
+print("tensorflow version", tf.__version__) 
+print("keras version", tf.keras.__version__) 
+print("Eager Execution Enabled:", tf.executing_eagerly())  
+
+# # Get the number of replicas # strategy = tf.distribute.MirroredStrategy() 
+# print("Number of replicas:", strategy.num_replicas_in_sync)  
+devices = tf.config.experimental.get_visible_devices() 
+print("Devices:", devices) 
+print(tf.config.experimental.list_logical_devices('GPU'))  
+print("GPU Available: ", tf.config.list_physical_devices('GPU')) 
+print("All Physical Devices", tf.config.list_physical_devices())  
+
+# Better performance with the tf.data API 
+# Reference: https://www.tensorflow.org/guide/data_performance 
+AUTOTUNE = tf.data.experimental.AUTOTUNE

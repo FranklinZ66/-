@@ -1,0 +1,5 @@
+python -m pip config set global.index-url https://mirrors.aliyun.com/pypi/simple 阿里
+
+python -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 清华
+
+pip config unset global.index-url （取消镜像（梯子的时候用））

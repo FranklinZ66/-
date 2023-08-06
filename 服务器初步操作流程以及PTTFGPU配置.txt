@@ -1,0 +1,137 @@
+2023.7.27 linux 使用pytorch 和tensorflow gpu运行
+-----------------------------------------------------启动服务器， 下载安装anaconda----------------------------------------------------------------------
+首先打开MobaTerm。 左上角session，使用SSH，输入服务器和自己的账号密码。进去以后输入账号，输入密码（密码不显示。）
+然后先看输入python 看python版本
+输入uname  看操作系统
+输入uname --help 查看其他操作想看的信息
+输入unam -i 看多少位的操作系统好去找合适的anaconda
+在这个网站https://repo.anaconda.com/archive/ 找到适合的版本号，不要最新的
+然后使用  wget https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh（这个看自己的版本） 来下载anaconda
+下载完后进行安装
+输入chmod -x Anaconda3-2022.05-Linux-x86_64.sh(就你下这个版本名字)
+然后 ./Anaconda3-2022.05-Linux-x86_64.sh
+
+然后一直回车 yes 回车 yes （最后会出现一个[no]>> 输入 yes 环境让他直接帮你配）
+（如果环境没配好，看这个https://blog.csdn.net/wyf2017/article/details/118676765）
+
+最后检查anaconda -V 查看是否安装完全。
+然后如果输出一系列你可以进行的操作，那就差不多了。退出服务器然后重新进去。
+---------------------------------------------------安装虚拟环境------------------------------------------------------------------
+前面如果有base就说明成功了
+conda info 看下
+然后要创建虚拟环境
+conda create -n pytorch python=3.9 （并且大于3.6小于3.9）（Tensorflow和pytorch分别创两个）
+然后输入conda info --envs 可以查看你创建的虚拟环境
+如果你名字起错了 输入conda remove -n your_env_name --all 
+删除虚拟环境中的包：使用命令conda remove --name $your_env_name  $package_name（包名） 即可。
+
+安装完后启动虚拟环境使用 conda activate pytorch (前面变成pytorch（环境名）就说明启动成功)
+-----------------------------设置清华镜像源---------------------------------------------------
+pip install pip -U
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
+pip install (pandas, matplotlab, numpy, keras)
+
+--------------------设置完镜像最好提前安装的库-------------------
+pip install "库名"
+numpy pandas matplotlib jupyter
+
+--------------------------------------------安装pytorch gpu版-------------------------------------------------
+python2.9+torch2.0.1+cutool11.8.0+cudann8.9.2.26(这套配置反正我能下到gpu版本)
+
+首先conda list 查看有没有安装cudatoolkit cudnn以及版本。
+如果没有安装输入 conda install cudatoolkit  cudnn来自动安装适配的（如果出现问题试试分开安装）
+然后去pytorch官网https://pytorch.org/  找到对应版本的pytorch 。一般来说稳定的cuda11.8 够用向下兼容。
+conda install pytorch=2.0.1 torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia 
+然后y
+下载完后进入python
+输入
+>>> import torch
+>>> torch.cuda.is_available()
+结果为true，就对了。
+--------------------------------------------安装Tensorflow gpu版-------------
+https://blog.csdn.net/ly869915532/article/details/124542362
+（最重要的就是要根据他自动给你配的cuda版本去找tensorflow版本。下载之前先conda search一下看下版本合不合适，要全部对应，建议一套。linux这个没下好）
+python3.8-3.11最好
+
+python3.9+tensorflow-gpu2.4.1+tensorflow2.4.1（gpu_py39h8236f22）+cuDNN7.6.5+cudatoolkit10.1.243+CUDA11.0
+
+conda activate tensorflow
+conda install cudatoolkit  cudnn tensorflow-gpu （让他自己找合适的）
+然后这个时候再 pip install tensorflow
+
+
+python
+import tensorflow as tf
+tf.test.is_gpu_available() 
+
+print(tf.config.experimental.list_physical_devices(device_type='GPU'))
+
+devices = tf.config.experimental.get_visible_devices() 
+print("Devices:", devices) 
+print(tf.config.experimental.list_logical_devices('GPU'))  
+print("GPU Available: ", tf.config.list_physical_devices('GPU')) 
+print("All Physical Devices", tf.config.list_physical_devices())  
+
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
+ 
+
+-----------------------------------------选择gpu运行 ------------------------------------------------------------
+lspci | grep -i nvidia 查看显卡信息
+！！下面一般是在自己.py文件里面写好（但也可以先设置）
+import os 
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  #（保证程序cuda序号与实际cuda序号对应）
+os.environ['CUDA_VISIBLE_DEVICES'] = "0,1"  #（代表仅使用第0，1号GPU）
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"  #代表只使用第3个gpu 没设置就默认0
+
+单gpu运行
+CUDA_VISIBLE_DEVICES=2 python train.py
+
+多gpu运行
+CUDA_VISIBLE_DEVICES=2,3,4 python train.py
+
+查看gpu 运行状态
+nvidia-smi
+输入top可以看到谁在用，用的哪一张
+watch -n 1 -d nvidia-smi # 每隔一秒刷新一次
+
+
+-----------------------------------------运行上传的文件---------------------------------------------------------
+在MobaXterm里面，直接创立一个文件夹，然后把本地win的要运行的所有文件拖到里面，然后复制运行文件路径。
+然后运行python path。
+Ctrl+c终止当前程序
+Ctrl+d 退出当前shell
+（conda可以直接运行ipynb文件）
+
+--------------------------------------------------常用命令-------------------------------------------------------------------
+conda常用命令
+conda list：查看安装了哪些包。
+conda install package_name(包名)：安装包
+conda env list 或 conda info -e：查看当前存在哪些虚拟环境
+conda update conda：检查更新当前conda 
+
+激活虚拟环境：
+使用如下命令即可激活创建的虚拟环境
+
+Linux:  source activate your_env_name(虚拟环境名称)
+
+Windows: activate your_env_name(虚拟环境名称)
+
+ 此时使用python --version可以检查当前python版本是否为想要的（即虚拟环境的python版本）。
+
+退出虚拟环境：
+使用如下命令即可退出创建的虚拟环境
+
+Linux:  source deactivate your_env_name(虚拟环境名称)
+
+Windows:deactivate env_name，也可以使用`activate root`切回root环境 或者 conda deactivate
+
+删除虚拟环境：
+删除环境：
+使用命令conda remove -n your_env_name(虚拟环境名称) --all， 即可删除。
+
+删除虚拟环境中的包：
+使用命令conda remove --name $your_env_name  $package_name（包名） 即可。
+
